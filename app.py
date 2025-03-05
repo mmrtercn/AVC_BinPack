@@ -125,6 +125,32 @@ def generate_pdf(project_name, project_number, profile_groups, bin_packing_func)
         st.error(f"Error generating PDF: {str(e)}")
         return None
 
+# Add this validation function near the top of your file
+def validate_lengths(lengths_str, max_length):
+    """Validate length inputs."""
+    if not lengths_str.strip():
+        return True, [], None
+    
+    try:
+        # Split and convert to integers
+        lengths = [
+            int(length.strip()) 
+            for length in lengths_str.split(",") 
+            if length.strip()
+        ]
+        
+        # Check for negative numbers
+        if any(length <= 0 for length in lengths):
+            return False, [], "❌ All lengths must be positive numbers"
+            
+        # Check for numbers exceeding max length
+        if any(length > max_length for length in lengths):
+            return False, [], f"❌ Lengths cannot exceed {max_length}mm"
+            
+        return True, lengths, None
+    except ValueError:
+        return False, [], "❌ Please enter valid numbers separated by commas"
+
 # 🏗️ 1️⃣ Proje Bilgileri ve Duvar Sayısı Girişi
 if st.session_state.step == 1:
     with st.form("project_form"):
@@ -158,6 +184,7 @@ elif 2 <= st.session_state.step <= st.session_state.num_walls + 1:
         st.session_state.profile_inputs[wall_name] = [{"profile": None, "lengths": ""} for _ in range(5)]
 
     with st.form(f"profile_form_{wall_name}"):
+        has_error = False
         for i, profile_data in enumerate(st.session_state.profile_inputs[wall_name]):
             col1, col2 = st.columns([2, 3])
             with col1:
@@ -171,11 +198,22 @@ elif 2 <= st.session_state.step <= st.session_state.num_walls + 1:
                 profile_data["profile"] = None if selected_profile == "Select Profile" else selected_profile
 
             with col2:
-                profile_data["lengths"] = st.text_input(
+                lengths_input = st.text_input(
                     "Lengths (comma-separated)",
                     value=profile_data["lengths"],
                     key=f"length_input_{wall_name}_{i}"
                 )
+                
+                # Validate lengths if there's input
+                if lengths_input.strip():
+                    is_valid, lengths, error_msg = validate_lengths(
+                        lengths_input, 
+                        st.session_state.max_length
+                    )
+                    if not is_valid:
+                        st.error(error_msg)
+                        has_error = True
+                    profile_data["lengths"] = lengths_input
 
         col_form1, col_form2 = st.columns([1, 1])
         with col_form1:
@@ -183,7 +221,10 @@ elif 2 <= st.session_state.step <= st.session_state.num_walls + 1:
                 prev_step()
         with col_form2:
             if st.form_submit_button("Next ➡️"):
-                next_step()
+                if has_error:
+                    st.error("❌ Please fix the errors before proceeding")
+                else:
+                    next_step()
 
 # 📝 3️⃣ Özet ve Bin Packing Sonuçları
 if st.session_state.step == st.session_state.num_walls + 2:
