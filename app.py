@@ -180,11 +180,14 @@ elif 2 <= st.session_state.step <= st.session_state.num_walls + 1:
     wall_name = st.session_state.wall_names[wall_index]
     st.title(f"🧱 {wall_name} Profiles")
 
+    # Initialize profile inputs with 5 profiles if not exists
     if wall_name not in st.session_state.profile_inputs:
         st.session_state.profile_inputs[wall_name] = [{"profile": None, "lengths": ""} for _ in range(5)]
 
     with st.form(f"profile_form_{wall_name}"):
         has_error = False
+        
+        # Display existing profile inputs
         for i, profile_data in enumerate(st.session_state.profile_inputs[wall_name]):
             col1, col2 = st.columns([2, 3])
             with col1:
@@ -215,6 +218,13 @@ elif 2 <= st.session_state.step <= st.session_state.num_walls + 1:
                         has_error = True
                     profile_data["lengths"] = lengths_input
 
+        # Add Profile button
+        if len(st.session_state.profile_inputs[wall_name]) < 15:
+            if st.form_submit_button("➕ Add Profile"):
+                st.session_state.profile_inputs[wall_name].append({"profile": None, "lengths": ""})
+                st.rerun()
+
+        # Navigation buttons
         col_form1, col_form2 = st.columns([1, 1])
         with col_form1:
             if st.form_submit_button("⬅️ Back"):
@@ -226,6 +236,9 @@ elif 2 <= st.session_state.step <= st.session_state.num_walls + 1:
                 else:
                     next_step()
 
+        # Show profile count
+        st.markdown(f"**Current profile count:** {len(st.session_state.profile_inputs[wall_name])} / 15")
+
 # 📝 3️⃣ Özet ve Bin Packing Sonuçları
 if st.session_state.step == st.session_state.num_walls + 2:
     profile_groups = {}
@@ -235,7 +248,7 @@ if st.session_state.step == st.session_state.num_walls + 2:
                 lengths = [int(length.strip()) for length in profile_data["lengths"].split(",") if length.strip().isdigit()]
                 profile_groups.setdefault(profile_data["profile"], []).extend([(length, wall) for length in lengths])
 
-    st.title("�� Summary & Bin Packing Results")
+    st.title("Summary & Bin Packing Results")
 
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
