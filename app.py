@@ -186,6 +186,7 @@ elif 2 <= st.session_state.step <= st.session_state.num_walls + 1:
 
     with st.form(f"profile_form_{wall_name}"):
         has_error = False
+        has_profile_selected = False  # Track if at least one profile is selected
         
         # Display existing profile inputs
         for i, profile_data in enumerate(st.session_state.profile_inputs[wall_name]):
@@ -199,6 +200,10 @@ elif 2 <= st.session_state.step <= st.session_state.num_walls + 1:
                     key=f"profile_select_{wall_name}_{i}"
                 )
                 profile_data["profile"] = None if selected_profile == "Select Profile" else selected_profile
+                
+                # Check if this row has a profile selected and lengths
+                if profile_data["profile"] is not None and profile_data["lengths"].strip():
+                    has_profile_selected = True
 
             with col2:
                 lengths_input = st.text_input(
@@ -233,6 +238,8 @@ elif 2 <= st.session_state.step <= st.session_state.num_walls + 1:
             if st.form_submit_button("Next ➡️"):
                 if has_error:
                     st.error("❌ Please fix the errors before proceeding")
+                elif not has_profile_selected:
+                    st.error("❌ Please select at least one profile and enter its lengths")
                 else:
                     next_step()
 
