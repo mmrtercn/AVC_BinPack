@@ -11,10 +11,10 @@ st.set_page_config(page_title="Profile Bin Packing", layout="centered")
 
 # 🎨 Başlık
 header_html = """
-<div style="background-color:black; padding:15px; border-radius:10px; text-align:center;">
+<div style="background-color:#1E1E1E; padding:20px; border-radius:10px; text-align:center; border:2px solid #FFD700;">
     <h1 style="color:#FFD700; margin-bottom:5px;">AVC Gemino</h1>
-    <h3 style="color:white; margin-top:0px; margin-bottom:5px;">Engineering Department</h3>
-    <h5 style="color:gray; margin-top:0px;">by MER</h5>
+    <h3 style="color:#FFD700; margin-top:0px; margin-bottom:5px;">Engineering Department</h3>
+    <h5 style="color:#FFD700; margin-top:0px;">by MER</h5>
 </div>
 """
 st.markdown(header_html, unsafe_allow_html=True)
@@ -290,22 +290,69 @@ if st.session_state.step == st.session_state.num_walls + 2:
     else:
         for profile, lengths_with_walls in profile_groups.items():
             packed_bins = bin_packing(lengths_with_walls)
-            st.subheader(f"🔩 Profile: {profile} ({len(packed_bins)} pcs)")
+            
+            # Updated header styling
+            st.markdown(f"""
+                <div style="background-color:#FFD700; padding:10px; border-radius:5px; margin:10px 0;">
+                    <h3 style="color:black; margin:0;">🔩 Profile: {profile} ({len(packed_bins)} pcs)</h3>
+                </div>
+            """, unsafe_allow_html=True)
 
             for i, bin_ in enumerate(packed_bins, start=1):
                 total_length = sum(length for length, _ in bin_)
                 leftover = st.session_state.max_length - total_length
                 cut_list_html = "".join(
-                    [f"<li><strong>{length} mm</strong> ---> <span style='color:#007acc;'>{wall}</span></li>" for length, wall in bin_]
+                    [f'<li><span style="color:#FFD700; font-weight:bold;">{length} mm</span> ---> <span style="color:#FFD700;">{wall}</span></li>' 
+                     for length, wall in bin_]
                 )
 
+                # Updated result box styling
                 st.markdown(
                     f"""
-                    <div style="border: 2px solid #FFD700; border-radius: 10px; padding: 10px; margin-bottom: 15px; background-color:#f9f9f9;">
-                        <h5>✂️ Cut Group {i} | <span style="color:green;">Total: {total_length} mm</span> | 
-                        <span style="color:orange;">Leftover: {leftover} mm</span></h5>
-                        <ul style="list-style-type:square; padding-left:20px;">{cut_list_html}</ul>
+                    <div style="border:2px solid #FFD700; border-radius:10px; padding:15px; margin-bottom:15px; 
+                             background-color:rgba(255, 215, 0, 0.1);">
+                        <h4 style="color:#FFD700; margin:0 0 10px 0;">✂️ Cut Group {i}</h4>
+                        <div style="color:#FFD700; font-weight:bold; margin-bottom:10px;">
+                            Total: {total_length} mm | Leftover: {leftover} mm
+                        </div>
+                        <ul style="list-style-type:square; padding-left:20px; margin:0;">
+                            {cut_list_html}
+                        </ul>
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
+
+# Add custom CSS to ensure consistent styling
+st.markdown("""
+    <style>
+    /* Form inputs and buttons */
+    .stButton button {
+        background-color: #FFD700 !important;
+        color: black !important;
+        border: none !important;
+        font-weight: bold !important;
+    }
+    .stButton button:hover {
+        background-color: #E5C100 !important;
+        color: black !important;
+    }
+    
+    /* Warning and error messages */
+    .stAlert {
+        background-color: rgba(255, 215, 0, 0.1) !important;
+        border: 1px solid #FFD700 !important;
+        color: #FFD700 !important;
+    }
+    
+    /* Text inputs and selectboxes */
+    .stTextInput, .stSelectbox {
+        border-color: #FFD700 !important;
+    }
+    
+    /* Success messages */
+    .success {
+        color: #FFD700 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
