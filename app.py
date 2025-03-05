@@ -291,7 +291,7 @@ if st.session_state.step == st.session_state.num_walls + 2:
         for profile, lengths_with_walls in profile_groups.items():
             packed_bins = bin_packing(lengths_with_walls)
             
-            # Updated header styling
+            # Header stays gold
             st.markdown(f"""
                 <div style="background-color:#FFD700; padding:10px; border-radius:5px; margin:10px 0;">
                     <h3 style="color:black; margin:0;">🔩 Profile: {profile} ({len(packed_bins)} pcs)</h3>
@@ -301,19 +301,19 @@ if st.session_state.step == st.session_state.num_walls + 2:
             for i, bin_ in enumerate(packed_bins, start=1):
                 total_length = sum(length for length, _ in bin_)
                 leftover = st.session_state.max_length - total_length
+                # Regular text uses default theme colors
                 cut_list_html = "".join(
-                    [f'<li><span style="color:#FFD700; font-weight:bold;">{length} mm</span> ---> <span style="color:#FFD700;">{wall}</span></li>' 
+                    [f'<li><strong>{length} mm</strong> ---> {wall}</li>' 
                      for length, wall in bin_]
                 )
 
-                # Updated result box styling
+                # Updated result box with default theme colors for text
                 st.markdown(
                     f"""
-                    <div style="border:2px solid #FFD700; border-radius:10px; padding:15px; margin-bottom:15px; 
-                             background-color:rgba(255, 215, 0, 0.1);">
+                    <div style="border:2px solid #FFD700; border-radius:10px; padding:15px; margin-bottom:15px;">
                         <h4 style="color:#FFD700; margin:0 0 10px 0;">✂️ Cut Group {i}</h4>
-                        <div style="color:#FFD700; font-weight:bold; margin-bottom:10px;">
-                            Total: {total_length} mm | Leftover: {leftover} mm
+                        <div style="margin-bottom:10px;">
+                            <strong>Total: {total_length} mm | Leftover: {leftover} mm</strong>
                         </div>
                         <ul style="list-style-type:square; padding-left:20px; margin:0;">
                             {cut_list_html}
