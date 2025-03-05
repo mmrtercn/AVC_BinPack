@@ -118,8 +118,12 @@ def generate_pdf(project_name, project_number, profile_groups, bin_packing_func)
             pdf.ln(2)
         pdf.ln(5)
 
-    pdf_bytes = pdf.output(dest='S')
-    return BytesIO(pdf_bytes)
+    try:
+        pdf_bytes = pdf.output(dest='S').encode('latin-1')
+        return BytesIO(pdf_bytes)
+    except Exception as e:
+        st.error(f"Error generating PDF: {str(e)}")
+        return None
 
 # 🏗️ 1️⃣ Proje Bilgileri ve Duvar Sayısı Girişi
 if st.session_state.step == 1:
@@ -190,7 +194,7 @@ if st.session_state.step == st.session_state.num_walls + 2:
                 lengths = [int(length.strip()) for length in profile_data["lengths"].split(",") if length.strip().isdigit()]
                 profile_groups.setdefault(profile_data["profile"], []).extend([(length, wall) for length in lengths])
 
-    st.title("📝 Summary & Bin Packing Results")
+    st.title("�� Summary & Bin Packing Results")
 
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
@@ -202,12 +206,13 @@ if st.session_state.step == st.session_state.num_walls + 2:
                     profile_groups,
                     bin_packing
                 )
-                st.download_button(
-                    label="📄 Download PDF",
-                    data=pdf_file,
-                    file_name=f"{st.session_state.project_name.replace(' ', '_')}_Cut_Lists.pdf",
-                    mime="application/pdf"
-                )
+                if pdf_file:  # Check if PDF generation was successful
+                    st.download_button(
+                        label="📄 Download PDF",
+                        data=pdf_file,
+                        file_name=f"{st.session_state.project_name.replace(' ', '_')}_Cut_Lists.pdf",
+                        mime="application/pdf"
+                    )
             else:
                 st.warning("⚠️ PDF oluşturmak için profil verisi bulunamadı.")
 
